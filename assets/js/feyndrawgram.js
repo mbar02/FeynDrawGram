@@ -1,7 +1,9 @@
+const APP_VERSION = 1.0;
+
 /* ### Global state, global variables and so on ############################# */
 let state = {
   mode:      'select', // point, line, text, select
-  gridSize:  40,
+  gridSize:  25,
   selection: [],  // IDs of selected objects
   history:   [],  // for Undo
   redoStack: [],  // for Redo
@@ -14,6 +16,7 @@ let state = {
 };
 
 // State variables
+let isPanning       = false;
 let isDrawingLine   = false;
 let lineStartCoords = null;
 let isDragging      = false;
@@ -23,7 +26,10 @@ let clipboard       = null;
 let isPasting       = false;
 let lastMouseCoords = null;
 let currentMousePos = { x: 0, y: 0 };
+let lastPanPos      = { x: 0, y: 0 };
 let objectClickedInMousedown = false;
+
+let viewBox = { x: 0, y: 0, w: 450, h: 300 };
 
 // References to GUI elements
 const propPanel      = document.getElementById('properties-panel');
@@ -32,42 +38,62 @@ const inputs         = document.getElementById(
 ).querySelectorAll('input, select');
 const inColor             = document.getElementById('prop-color');
 const defaultColor        = "#000000";
+inColor.value             = defaultColor;
 const inWidth             = document.getElementById('prop-width');
-const defaultWidth        = 2;
+const defaultWidth        = 1;
+inWidth.value             = defaultWidth;
 const inNodeStyle         = document.getElementById('prop-node-style');
 const defaultNodeStyle    = "solid";
+inNodeStyle.value         = defaultNodeStyle;
 const inNodeRadius        = document.getElementById('prop-node-radius');
-const defaultNodeRadius   = 5;
+const defaultNodeRadius   = 2;
+inNodeRadius.value        = defaultNodeRadius;
 const inLineType          = document.getElementById('prop-line-type');
 const defaultLineType     = "solid";
+inLineType.value          = defaultLineType;
 const inDashLength        = document.getElementById('prop-dash-length');
-const defaultDashLength   = "5";
+const defaultDashLength   = 3;
+inDashLength.value        = defaultDashLength;
 const inArrowSize         = document.getElementById('prop-arrow-size');
-const defaultArrowSize    = "20";
+const defaultArrowSize    = 10;
+inArrowSize.value         = defaultArrowSize;
 const inArrowStart        = document.getElementById('prop-arrow-start');
 const defaultArrowStart   = false;
+inArrowStart.checked      = defaultArrowStart;
 const inArrowMid          = document.getElementById('prop-arrow-mid');
 const defaultArrowMid     = false;
+inArrowMid.checked        = defaultArrowMid;
 const inArrowEnd          = document.getElementById('prop-arrow-end');
 const defaultArrowEnd     = false;
+inArrowEnd.checked        = defaultArrowEnd;
 const inArrowFlip         = document.getElementById('prop-arrow-flip');
 const defaultArrowFlip    = false;
+inArrowFlip.checked       = defaultArrowFlip;
 const inMultiplicity      = document.getElementById('prop-multiplicity');
 const defaultMultiplicity = 1;
+inMultiplicity.value      = defaultMultiplicity;
 const inFillType          = document.getElementById('prop-fill-type');
 const defaultFillType     = "solid";
+inFillType.value          = defaultFillType;
 const inFillColor         = document.getElementById('prop-fill-color');
 const defaultFillColor    = "#ffffff";
+inFillColor.value         = defaultFillColor;
 const inPatAngle          = document.getElementById('prop-pat-angle');
 const defaultPatAngle     = 45;
+inPatAngle.value          = defaultPatAngle;
 const inPatColor          = document.getElementById('prop-pat-color');
 const defaultPatColor     = "#000000";
+inPatColor.value          = defaultPatColor;
 const inPatWidth          = document.getElementById('prop-pat-width');
 const defaultPatWidth     = 2;
+inPatWidth.value          = defaultPatWidth;
 const inPatSpacing        = document.getElementById('prop-pat-spacing');
-const defaultPatSpacing   = 10;
+const defaultPatSpacing   = 4;
+inPatSpacing.value        = defaultPatSpacing;
 const svg = document.getElementById('feynman-canvas');
 const inExplicitWaves     = document.getElementById('prop-explicit-waves');
+
+const fontSize = 11;
 
 // Previews
 /*
@@ -547,7 +573,7 @@ function render(isShiftPress=false, targetSvg = svg) {
     textNode.setAttribute("id", label.id);
     textNode.setAttribute("x",  label.x);
     textNode.setAttribute("y",  label.y);
-    textNode.setAttribute("font-size",   24);
+    textNode.setAttribute("font-size",   fontSize);
     textNode.setAttribute("font-family", "monospace");
     textNode.setAttribute("text-anchor", "middle");
     textNode.setAttribute("dominant-baseline", "central");
@@ -723,6 +749,25 @@ function updatePropertiesPanel() {
 }
 
 /*
+ *  Update the viewBox (triggered during window resizing)
+ */
+function updateViewBox() {
+  const ratio = svg.clientHeight / svg.clientWidth;
+  viewBox.h = viewBox.w * ratio;
+  svg.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`);
+  
+  const gridRect = document.getElementById('grid-background');
+  if (gridRect) {
+    gridRect.setAttribute('x', viewBox.x);
+    gridRect.setAttribute('y', viewBox.y);
+    gridRect.setAttribute('width',  viewBox.w);
+    gridRect.setAttribute('height', viewBox.h);
+  }
+
+  render();
+}
+
+/*
  *  Set the operating mode (select mode, insert a vertex, ...)
  */
 function setMode(newMode) {
@@ -744,14 +789,21 @@ function setMode(newMode) {
 }
 
 function updateSnapping(value) {
-  state.gridSize = parseInt(value, 10);
+  state.gridSize = parseInt(value, 5);
 }
 
 // Helper function for snapping
 function getMouseCoords(e) {
-  const rect = svg.getBoundingClientRect();
-  let x = e.clientX - rect.left;
-  let y = e.clientY - rect.top;
+  // fake point created
+  const pt = svg.createSVGPoint();
+  pt.x = e.clientX;
+  pt.y = e.clientY;
+  
+  // apply the inverse transformation matrix to get the real coordinates
+  const svgP = pt.matrixTransform(svg.getScreenCTM().inverse());
+  
+  let x = svgP.x;
+  let y = svgP.y;
   
   const snapThreshold = 10**2;
 
@@ -1010,7 +1062,6 @@ function addLabel (x, y) {
     text: text,
     x:    x,
     y:    y,
-    fontSize: 24
   });
   
   render();
@@ -1022,6 +1073,9 @@ svg.addEventListener('click', (e) => {
   
   // Do not select if just created an object
   if (objectClickedInMousedown && state.mode !== 'line') return;
+
+  // Do not select if just panning
+  if (e.ctrlKey || e.metaKey) return;
 
   switch(state.mode) {
     case 'point':
@@ -1087,6 +1141,20 @@ propPanel.addEventListener('input', (e) => {
 svg.addEventListener('mouseleave', hidePreviews);
 
 svg.addEventListener('mousemove', (e) => {
+  if (isPanning) {
+    const dx = e.clientX - lastPanPos.x;
+    const dy = e.clientY - lastPanPos.y;
+    
+    // Convert pixel into the right scale
+    const scale = viewBox.w / svg.clientWidth;
+    viewBox.x -= dx * scale;
+    viewBox.y -= dy * scale;
+    
+    updateViewBox();
+    lastPanPos = { x: e.clientX, y: e.clientY };
+    return;
+  }
+
   const coords = getMouseCoords(e);
   currentMousePos = coords;
   
@@ -1417,6 +1485,10 @@ svg.addEventListener('mousemove', (e) => {
               const vx = coords.x - midX;
               const vy = coords.y - midY;
               edge.curvature = vx * nx + vy * ny;
+              // if approx straight line, it becomes again a stright line.
+              if ( Math.abs(edge.curvature) < 5 ) {
+                edge.curvature = 0;
+              }
             }
           } else if (dragTarget.handleType === 'center') {
             const dx = edge.x2 - edge.x1;
@@ -1442,12 +1514,23 @@ svg.addEventListener('mousemove', (e) => {
 });
 
 svg.addEventListener('mousedown', (e) => {
+  // Start panning
+  if (e.ctrlKey || e.metaKey) {
+    e.preventDefault();
+    isPanning = true;
+    lastPanPos = { x: e.clientX, y: e.clientY };
+    svg.style.cursor = 'grabbing';
+    return;
+  }
+
   hasDragged = false;
   objectClickedInMousedown = false;
 
   if (isPasting) {
     isPasting = false;
-    return; // Ferma il mousedown qui
+    // release selected objects
+    state.selection = [];
+    return; // Stop the mouse here
   }
 
   const target = e.target.closest('.diagram-object') || e.target;
@@ -1574,6 +1657,11 @@ if (
 });
 
 window.addEventListener('mouseup', (e) => {
+  if (isPanning) {
+    isPanning = false;
+    svg.style.cursor = 'crosshair';
+    return;
+  }
   if (isDragging && dragTarget && dragTarget.type === 'select-box') {
     const bx1 = parseFloat(selectionBox.getAttribute("x"));
     const by1 = parseFloat(selectionBox.getAttribute("y"));
@@ -1629,6 +1717,10 @@ window.addEventListener('mouseup', (e) => {
 
 window.addEventListener('keydown', (e) => {
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+  if (e.key === 'Control' || e.key === 'Meta') {
+    svg.style.cursor = 'grab';
+  }
 
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
     e.preventDefault();
@@ -1799,46 +1891,56 @@ window.addEventListener('keydown', (e) => {
 });
 
 window.addEventListener('keyup', (e) => {
+  if ((e.key === 'Control' || e.key === 'Meta') && !isPanning) {
+    svg.style.cursor = 'crosshair';
+  }
   render(e.shiftKey);
 })
+
+window.addEventListener('resize', updateViewBox)
 
 /* ### `- Setup routines #################################################### */
 function initGrid() {
   const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
   
   // Pattern 1: Dashed grid
-  const fineGrid = document.createElementNS("http://www.w3.org/2000/svg", "pattern");
+  const fineGrid = document.createElementNS(
+    "http://www.w3.org/2000/svg", "pattern"
+  );
   fineGrid.setAttribute("id", "fine-grid");
-  fineGrid.setAttribute("width", "10");
-  fineGrid.setAttribute("height", "10");
+  fineGrid.setAttribute("width", "5");
+  fineGrid.setAttribute("height", "5");
   fineGrid.setAttribute("patternUnits", "userSpaceOnUse");
-  fineGrid.innerHTML = '<path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(0, 0, 0, 0.15)" stroke-width="0.5" stroke-dasharray="2,2"/>';
+  fineGrid.innerHTML = '<path d="M 5 0 L 0 0 0 5" fill="none" stroke="rgba(0, 0, 0, 0.15)" stroke-width="0.25" stroke-dasharray="1,1"/>';
   
   // Pattern 2: Solid grid
-  const coarseGrid = document.createElementNS("http://www.w3.org/2000/svg", "pattern");
+  const coarseGrid = document.createElementNS(
+    "http://www.w3.org/2000/svg", "pattern"
+  );
   coarseGrid.setAttribute("id", "coarse-grid");
-  coarseGrid.setAttribute("width", "40");
-  coarseGrid.setAttribute("height", "40");
+  coarseGrid.setAttribute("width", "25");
+  coarseGrid.setAttribute("height", "25");
   coarseGrid.setAttribute("patternUnits", "userSpaceOnUse");
-  // Il pattern largo disegna se stesso, ma riempie lo sfondo con il pattern fine
-  coarseGrid.innerHTML = '<rect width="40" height="40" fill="url(#fine-grid)"/>' +
-                         '<path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(0, 0, 0, 0.3)" stroke-width="1"/>';
+
+  coarseGrid.innerHTML = '<rect width="25" height="25" fill="url(#fine-grid)"/>' +
+                         '<path d="M 25 0 L 0 0 0 25" fill="none" stroke="rgba(0, 0, 0, 0.3)" stroke-width="0.5"/>';
   
   defs.appendChild(fineGrid);
   defs.appendChild(coarseGrid);
   svg.appendChild(defs);
   
-  // Rettangolo grande quanto tutto il canvas che fa da "foglio a quadretti"
-  const gridRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+  const gridRect = document.createElementNS(
+    "http://www.w3.org/2000/svg", "rect"
+  );
   gridRect.id = "grid-background";
   gridRect.setAttribute("width", "100%");
   gridRect.setAttribute("height", "100%");
   gridRect.setAttribute("fill", "url(#coarse-grid)");
-  gridRect.setAttribute("style", "pointer-events: none;"); // Fondamentale: ignora i click per non disturbare gli oggetti
+  gridRect.setAttribute("style", "pointer-events: none;");
   
   svg.appendChild(gridRect);
 
-  render();
+  updateViewBox();
 }
 
 // Setup
@@ -1882,18 +1984,15 @@ function exportTypst() {
   alert("Work in progress...");
 }
 
-
 function exportLaTeX() {
-  const SCALE = 0.5;
-
   // Number / coordinate helpers
   const fmt = (n) => {
     const v = +n;
     if (!isFinite(v)) return "0";
     return Number(v.toFixed(3)).toString();
   };
-  const PT = (n) => `${fmt(n * SCALE)}pt`;
-  const C  = (x, y) => `(${fmt(x*SCALE)}pt,${fmt(-y*SCALE)}pt)`;
+  const PT = (n) => `${fmt(n)}pt`;
+  const C  = (x, y) => `(${fmt(x)}pt,${fmt(-y)}pt)`;
 
   // Color cache
   const colorCache = new Map();
@@ -2112,7 +2211,7 @@ function exportLaTeX() {
           const A = 5 / mult;
           opts.push(`decorate`,
             `decoration={coil, amplitude=${PT(A)}, ` +
-            `segment length=${PT(12)}, aspect=0.5, ` +
+            `segment length=${PT(10)}, aspect=1, ` +
             `pre length=0pt, post length=0pt}`);
         }
         body += `  \\path[${opts.join(', ')}] ` +
@@ -2123,8 +2222,8 @@ function exportLaTeX() {
     // Arrows (always on the smooth central path)
     if (edge.arrowStart || edge.arrowMid || edge.arrowEnd) {
       const arrowSize = +edge.arrowSize || +defaultArrowSize;
-      const tipSize   = arrowSize * 1.5;       // <-- 1.5x bigger
-      const tip = `Stealth[length=${PT(tipSize)}, ` +
+      const tipSize   = arrowSize * 1.2;
+      const tip = `Stealth[color=${color}, length=${PT(tipSize)}, ` +
                   `width=${PT(tipSize*0.8)}, inset=${PT(tipSize*0.3)}]`;
 
       const isTadpole = (geom.c < 0.1);
@@ -2144,7 +2243,7 @@ function exportLaTeX() {
       if (edge.arrowEnd)   pushMark(1,   !effFlip,   endOff);
 
       const aOpts = [
-        `draw=${color}`,
+        `color=${color}`,
         `line width=${PT(sw)}`,
         `decorate`,
         `decoration={markings, ${marks.join(', ')}}`
@@ -2199,9 +2298,9 @@ function exportLaTeX() {
   // 3. NODES
   state.nodes.forEach(node => {
     const stroke = tikzColor(node.color || defaultColor);
-    const sw     = +node.strokeWidth || defaultWidth;
-    const r      = +node.radius      || defaultNodeRadius;
-    const style  = node.nodeStyle    || defaultNodeStyle;
+    const sw     = +node.strokeWidth    || defaultWidth;
+    const r      = +node.radius         || defaultNodeRadius;
+    const style  = node.nodeStyle       || defaultNodeStyle;
     body += `  % Node ${node.id} (${style})\n`;
 
     const circlePath = `${C(node.x, node.y)} circle [radius=${PT(r)}]`;
@@ -2277,10 +2376,11 @@ ${body}\\end{tikzpicture}
 
 function saveDiagram() {
   const data = {
-    nodes:  state.nodes,
-    edges:  state.edges,
-    labels: state.labels,
-    shapes: state.shapes
+    version: APP_VERSION,
+    nodes:   state.nodes,
+    edges:   state.edges,
+    labels:  state.labels,
+    shapes:  state.shapes
   };
   const json = JSON.stringify(data, null, 2);
   const blob = new Blob([json], { type: 'application/json' });
@@ -2305,6 +2405,56 @@ function loadDiagram() {
     reader.onload = (re) => {
       try {
         const data = JSON.parse(re.target.result);
+        
+        // Check for retrocompatibility
+        let fileVersion = parseFloat(data.version) || 0.0;
+        
+        if (fileVersion > APP_VERSION) {
+          alert(`Warning: this file has been created with a more recent version of FeynDrawGram (v${fileVersion}). Unexpected errors may occur.`);
+        }
+
+        if (fileVersion === 0.0) {
+          console.log("Rilevata versione 0.0: applico rescaling 25/40...");
+          const f = 25 / 40;
+
+          // Rescaling nodes
+          (data.nodes || []).forEach(n => {
+            n.x *= f; n.y *= f;
+            if (n.radius) n.radius *= f;
+            if (n.strokeWidth) n.strokeWidth *= f;
+            if (n.patWidth) n.patWidth *= f;
+            if (n.patSpacing) n.patSpacing *= f;
+          });
+
+          // Rescaling edges
+          (data.edges || []).forEach(ed => {
+            ed.x1 *= f; ed.y1 *= f;
+            ed.x2 *= f; ed.y2 *= f;
+            if (ed.curvature) ed.curvature *= f;
+            if (ed.strokeWidth) ed.strokeWidth *= f;
+            if (ed.dashLength) ed.dashLength *= f;
+            if (ed.arrowSize) ed.arrowSize *= f;
+          });
+
+          // Rescaling shapes
+          (data.shapes || []).forEach(s => {
+            s.x *= f; s.y *= f;
+            if (s.width) s.width *= f;
+            if (s.height) s.height *= f;
+            if (s.rx) s.rx *= f;
+            if (s.ry) s.ry *= f;
+            if (s.strokeWidth) s.strokeWidth *= f;
+            if (s.patWidth) s.patWidth *= f;
+            if (s.patSpacing) s.patSpacing *= f;
+          });
+
+          // Rescaling text
+          (data.labels || []).forEach(l => {
+            l.x *= f; l.y *= f;
+            if (l.fontSize) delete l.fontSize;
+          });
+        }
+      
         saveHistory();
         state.nodes  = data.nodes  || [];
         state.edges  = data.edges  || [];
