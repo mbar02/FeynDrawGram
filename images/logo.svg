@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="9.999999mm"
+   height="10mm"
+   viewBox="0 0 9.999999 10"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.2 (ebf0e940, 2025-05-08)"
+   sodipodi:docname="logo.svg"
+   inkscape:export-filename="logo.png"
+   inkscape:export-xdpi="162.56001"
+   inkscape:export-ydpi="162.56001"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="11.98773"
+     inkscape:cx="22.773286"
+     inkscape:cy="12.262539"
+     inkscape:window-width="1728"
+     inkscape:window-height="1055"
+     inkscape:window-x="0"
+     inkscape:window-y="34"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1"
+     showgrid="false" />
+  <defs
+     id="defs1">
+    <inkscape:path-effect
+       effect="fillet_chamfer"
+       id="path-effect1"
+       is_visible="true"
+       lpeversion="1"
+       nodesatellites_param="F,0,0,1,0,0,0,1 @ F,0,0,1,0,2.6704079,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,1.1641586,0,1"
+       radius="0"
+       unit="px"
+       method="auto"
+       mode="F"
+       chamfer_steps="1"
+       flexible="false"
+       use_knot_distance="true"
+       apply_no_radius="true"
+       apply_with_radius="true"
+       only_selected="false"
+       hide_knots="false" />
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       style="fill:#4d5f93;fill-opacity:1;stroke:#efefef;stroke-width:1;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke"
+       id="rect1"
+       width="9.9469995"
+       height="9.9470558"
+       x="0.026472181"
+       y="0.026472181"
+       ry="0"
+       inkscape:path-effect="#path-effect1"
+       sodipodi:type="rect"
+       d="M 0.02647218,0.02647218 H 7.3030638 A 2.6704079,2.6704079 45 0 1 9.9734717,2.6968801 V 9.973528 H 1.1906308 A 1.1641586,1.1641586 45 0 1 0.02647218,8.8093694 Z" />
+    <path
+       style="font-weight:bold;font-size:11.2889px;font-family:'Roboto Condensed';-inkscape-font-specification:'Roboto Condensed, Bold';letter-spacing:0px;fill:#fffffc;stroke:#ffffff;stroke-width:0.4;stroke-linecap:square;paint-order:markers fill stroke"
+       d="M 2.9439644,3.3077671 V 8.037199 H 1.3950479 V 2.0730436 H 2.8447456 Z M 2.7234781,4.8511715 2.2990419,4.8621958 Q 2.2880176,4.2338097 2.4092851,3.7046425 2.5305526,3.1754753 2.7730875,2.7841121 3.0211347,2.3927488 3.3959614,2.1777747 3.7763004,1.9628005 4.2723946,1.9628005 q 0.3197052,0 0.5953131,0.1212675 0.2811201,0.1157553 0.4795578,0.3693146 0.2039499,0.2480471 0.314193,0.6504347 0.1102432,0.3968754 0.1102432,0.9536034 V 8.037199 H 4.2338095 V 4.2448341 q 0,-0.3968755 -0.07717,-0.6063375 Q 4.0794691,3.4235225 3.936153,3.3408401 3.7928368,3.2526455 3.5833748,3.2526455 q -0.2204863,0 -0.3858511,0.1212675 Q 3.032159,3.4951805 2.927428,3.7156668 2.8282091,3.930641 2.7730875,4.2227854 2.7234781,4.5149298 2.7234781,4.8511715 Z M 5.6283856,4.696831 5.0771697,4.7684891 Q 5.0606333,4.1786881 5.1763886,3.6660574 5.2921439,3.1534267 5.5346789,2.7730878 5.7772139,2.3927488 6.1410163,2.1777747 6.5103309,1.9628005 6.9954009,1.9628005 q 0.3638024,0 0.661459,0.1212675 0.2976565,0.1212674 0.5071185,0.3913632 0.2149742,0.2645836 0.3252174,0.7000441 0.1157553,0.4299484 0.1157553,1.0583344 V 8.037199 H 7.0560346 V 4.2393219 q 0,-0.4023876 -0.07717,-0.6173617 -0.071658,-0.2149742 -0.2149742,-0.2921444 -0.1433161,-0.07717 -0.347266,-0.07717 -0.1984377,0 -0.347266,0.1102432 Q 5.9260421,3.4731319 5.8268233,3.6715696 5.7276044,3.8700073 5.677995,4.1290787 5.6283856,4.3881502 5.6283856,4.696831 Z"
+       id="text1"
+       aria-label="m" />
+  </g>
+</svg>

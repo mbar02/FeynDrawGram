@@ -1,0 +1,304 @@
+<!DOCTYPE HTML>
+<!--
+	Stellar by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html lang="en">
+	<head>
+		<title>FeynDrawGram</title>
+		<meta charset="utf-8">
+		<meta name="keywords" content="feyndrawgram, feynman, diagram, diagrams, diagramma, qft, draw, latex, typst, tikz, cetz, svg, vectorial">
+		<meta name="description" content="Modern web app for creating LaTeX (TikZ) and Typst (CeTZ) code from Feynman diagrams.">
+		<meta name="author" content="Martino Barbieri">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="canonical" href="https://mbarbieri.it/feyndrawgram/"/>
+		<link rel="stylesheet" href="assets/css/main.css">
+		<link rel="stylesheet" href="assets/css/feyndrawgram.css">
+		<link rel="icon" type="image/png" href="images/logo.png">
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css"></noscript>
+		<!-- Google tag (gtag.js) -->
+		<script async src="https://www.googletagmanager.com/gtag/js?id=G-V8CDSFE6TV"></script>
+		<script>
+			window.dataLayer = window.dataLayer || [];
+			function gtag(){dataLayer.push(arguments);}
+			gtag('js', new Date());
+			gtag('config', 'G-V8CDSFE6TV');
+		</script>
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header" class="alt">
+						<h1>FeynDrawGram</h1>
+					</header>
+
+				<!-- Main -->
+					<div id="main">
+						<section class="main">
+							<div class="spotlight">
+								<div class="content">
+									<header class="major">
+										<h2>General Information</h2>
+									</header>
+									<p>
+										The site is free to use, and the diagrams you create are yours to share for any purpose. No closed nor open strings attached!
+										<br>
+										By <a class="link" href="https://mbarbieri.it/">Tino Barbieri</a>.
+									</p>
+									<p>
+										<span>&#9888;</span> Pro-tip! Try pressing “shift” when a line is selected.
+									</p>
+									<p>
+										For comments, suggestions, or bug reports, feel free to contact me via email or visit the <a href="TUO_LINK_GITHUB" target="_blank" rel="noopener noreferrer" class="link">GitHub repository</a>.
+									</p>
+								</div>
+							</div>
+						</section>
+
+						<section class="main">
+								<div id="app-container">    
+									<form id="toolbox">
+										<h3>Toolbox</h3>
+										
+										<div id="tools">
+											<a class="button small primary" id="btn-select" onclick="setMode('select')">Select</a>
+											<a class="button small" id="btn-point" onclick="setMode('point')">Vertex</a>
+											<a class="button small" id="btn-line" onclick="setMode('line')">Line</a>
+											<a class="button small" id="btn-blob" onclick="setMode('blob')">Blob</a>
+											<a class="button small" id="btn-box" onclick="setMode('box')">Box</a>
+											<a class="button small" id="btn-text" onclick="setMode('text')">Text</a>
+										</div>
+
+										<div style="margin-bottom: 1.5rem;">
+											<label style="font-size: 0.8rem;">Snap option:</label>
+											<select id="snap-select" onchange="updateSnapping(this.value)">
+												<option value="40">Snap pointer to the solid grid</option>
+												<option value="10">Snap pointer to the dashed grid</option>
+												<option value="0">Ignore the grid</option>
+											</select>
+										</div>
+
+										<div id="properties-panel">
+											<div class="row gtr-uniform">
+												
+												<div class="col-3 col-6-medium col-12-xsmall">
+													<h5>Borders & Color</h5>
+													<div class="prop-group">
+														<label>Border Color</label>
+														<input class="node-prop line-prop shape-prop" type="color" id="prop-color" value="#000000">
+													</div>
+													<div class="prop-group">
+														<label>Stroke Width (px)</label>
+														<input class="node-prop line-prop shape-prop" type="number" id="prop-width" min="0" value="2">
+													</div>
+												</div>
+
+												<div class="col-3 col-6-medium col-12-xsmall">
+													<h5>Vertex Style</h5>
+													<div class="prop-group">
+														<label>Vertex Type</label>
+														<select class="node-prop" id="prop-node-style">
+															<option value="solid">Fill</option>
+															<option value="odot">odot</option>
+															<option value="otimes">otimes</option>
+															<option value="square">Square</option>
+															<option value="diamond">Diamond</option>
+														</select>
+													</div>
+													<div class="prop-group">
+														<label>Vertex Radius</label>
+														<input class="node-prop" type="number" id="prop-node-radius" min="0" value="5">
+													</div>
+												</div>
+
+												<div class="col-3 col-6-medium col-12-xsmall">
+													<h5>Fill & Pattern</h5>
+													<div class="prop-group">
+														<label>Fill Type</label>
+														<select class="node-prop shape-prop" id="prop-fill-type">
+															<option value="solid">Color</option>
+															<option value="pattern">Pattern</option>
+														</select>
+													</div>
+													<div class="prop-group" style="display: flex; gap: 0.5rem;">
+														<div style="flex: 1; min-width: 0;">
+															<label>Fill Color</label>
+															<input class="node-prop shape-prop" type="color" id="prop-fill-color" value="#ffffff">
+														</div>
+														<div style="flex: 1; min-width: 0;">
+															<label>Lines Color</label>
+															<input class="node-prop shape-prop" type="color" id="prop-pat-color" value="#000000">
+														</div>
+													</div>
+													<div class="prop-group" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+														<div style="flex: 1 1 40%; min-width: 0;">
+															<label>Angle</label>
+															<input class="node-prop shape-prop" type="number" id="prop-pat-angle" value="45">
+														</div>
+														<div style="flex: 1 1 40%; min-width: 0;">
+															<label>Weight</label>
+															<input class="node-prop shape-prop" type="number" id="prop-pat-width" min="0" value="2">
+														</div>
+														<div style="flex: 1 1 100%; min-width: 0;">
+															<label>Spacing</label>
+															<input class="node-prop shape-prop" type="number" id="prop-pat-spacing" min="0" value="10">
+														</div>
+													</div>
+												</div>
+
+												<div class="col-3 col-6-medium col-12-xsmall">
+													<h5>Lines & Arrows</h5>
+													<div class="prop-group">
+														<label>Line Style</label>
+														<select class="line-prop" id="prop-line-type">
+															<option value="solid">Solid</option>
+															<option value="dashed">Dashed</option>
+															<option value="wavy">Wavy (Photon)</option>
+															<option value="gluon">Spring (Gluon)</option>
+														</select>
+													</div>
+													<div class="prop-group" style="display: flex; gap: 0.5rem;">
+														<div style="flex: 1; min-width: 0;">
+															<label>Multiplicity</label>
+															<select class="line-prop" id="prop-multiplicity">
+																<option value="1">Single</option>
+																<option value="2">Double</option>
+																<option value="3">Triple</option>
+															</select>
+														</div>
+														<div style="flex: 1; min-width: 0;">
+															<label>Dash Len.</label>
+															<input class="line-prop" type="number" id="prop-dash-length" min="0" value="5">
+														</div>
+													</div>
+													<div class="prop-group">
+														<label>Arrow Size</label>
+														<input class="line-prop" type="number" id="prop-arrow-size" min="0" value="20">
+													</div>
+													<div class="prop-group" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+														<div style="width: 45%;">
+															<input class="line-prop" type="checkbox" id="prop-arrow-start">
+															<label for="prop-arrow-start">Start</label>
+														</div>
+														<div style="width: 45%;">
+															<input class="line-prop" type="checkbox" id="prop-arrow-mid">
+															<label for="prop-arrow-mid">Mid</label>
+														</div>
+														<div style="width: 45%;">
+															<input class="line-prop" type="checkbox" id="prop-arrow-end">
+															<label for="prop-arrow-end">End</label>
+														</div>
+														<div style="width: 100%;">
+															<input class="line-prop" type="checkbox" id="prop-arrow-flip">
+															<label for="prop-arrow-flip">Flip Arrows</label>
+														</div>
+													</div>
+												</div>
+
+											</div>
+										</div>
+									</form>
+										
+									<div id="canvas-wrapper" style="border: 2px solid #ccc; background: white; border-radius: 8px; overflow: hidden; cursor: crosshair;">
+										<svg id="feynman-canvas" width="100%" height="500" style="display: block;"></svg>
+									</div>
+								</div>
+
+								<div id="export-tools" style="margin-top: 1rem;">
+									<div class="row gtr-uniform">
+										<div class="col-4 col-12-xsmall">
+											<a class="button small fit" onclick="exportSVG()">Export SVG</a>
+										</div>
+										<div class="col-4 col-12-xsmall">
+											<a class="button small fit" id="btn-export-typst" onclick="exportTypst()">Export Typst</a>
+										</div>
+										<div class="col-4 col-12-xsmall">
+											<a class="button small fit" id="btn-export-code" onclick="exportLaTeX()">Export LaTeX</a>
+										</div>
+									</div>
+								</div>
+
+								<div class="fit" style="margin-top: 0.5rem;">
+									<input type="checkbox" id="prop-explicit-waves">
+									<label for="prop-explicit-waves">Always use explicit waves (see below).</label>
+								</div>
+
+								<div id="save-load-tools" style="margin-top: 0.5rem;">
+									<div class="row gtr-uniform">
+										<div class="col-6 col-12-xsmall">
+											<a class="button small fit" onclick="saveDiagram()">Save</a>
+										</div>
+										<div class="col-6 col-12-xsmall">
+											<a class="button small fit" onclick="loadDiagram()">Load a saved file</a>
+										</div>
+									</div>
+								</div>
+							</section>
+
+							<section class="main">
+								<h2>Export Information</h2>
+								<h3>On Typst and LaTeX exportation</h3>
+								<p>
+									LaTeX (TikZ) and Typst (CeTZ) natively support wavy and spring-like paths for photons and gluons.
+									However, when drawing highly curved or high-multiplicity propagators, native decorations can produce
+									graphical artifacts due to phase shifts between the inner and outer strokes.
+								</p>
+								<p>
+									To prevent this, FeynDrawGram automatically falls back to an explicit, point-by-point path generation
+									for the entire diagram when such complex lines are detected. While this ensures perfect pixel-to-pixel
+									consistency with the web preview, it produces larger code that takes longer to compile and is harder to edit manually. 
+									If you prefer, you can force this high-fidelity export for all diagrams by checking the
+									<strong>"Always use explicit waves"</strong> option above.
+								</p>
+								<h3>Typst dependencies</h3>
+								Work in progress...	
+								<h3>LaTeX dependencies</h3>
+								<div id="latex-deps-notice" style="margin-top: 1rem; padding: 1rem; background-color: #fff8e1; border: 1px solid #ffe082; border-radius: 0.5rem; font-size: 0.85rem;">
+										<strong>To compile the exported <code>.tex</code> file</strong>, you must include into the preable:
+										<pre style="margin: 0.5rem 0; background: #fff; padding: 0.6rem; border-radius: 0.3rem; overflow-x: auto;">\usepackage{tikz}
+\usepackage{xcolor}
+\usetikzlibrary{decorations.pathmorphing}
+\usetikzlibrary{decorations.markings}
+\usetikzlibrary{patterns}
+\usetikzlibrary{patterns.meta}
+\usetikzlibrary{arrows.meta}</pre>
+										After that, you can import your Feynman diagram with <code>\input{feynman_diagram.tex}</code>.
+								</div>
+							</section>
+					</div>
+
+				<!-- Footer -->
+					<footer id="footer">
+							<h2>Webmaster contacts</h2>
+							<dl class="alt">
+								<dt>Email</dt>
+								<dd><a href="mailto:mbarbieri2002@gmail.com">mbarbieri2002@gmail.com</a></dd>
+								<dd><a href="mailto:martino.barbieri@sns.it">martino.barbieri@sns.it</a></dd>
+								<dd><a href="mailto:m.barbieri20@studenti.unipi.it">m.barbieri20@studenti.unipi.it</a></dd>
+							</dl>
+						<p class="copyright">
+							&copy; Martino Barbieri. Design: <a href="https://html5up.net">HTML5 UP</a> (“Stellar”, modified).
+							 Licensed under <a href="http://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>.
+    					<a href="/licenses/LICENSE.txt">Full license.</a>
+						</p>
+					</footer>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+			<script src="assets/js/feyndrawgram.js"></script>
+
+	</body>
+</html>
