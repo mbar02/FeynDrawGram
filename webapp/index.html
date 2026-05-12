@@ -210,21 +210,17 @@
 
 								<div id="export-tools" style="margin-top: 1rem;">
 									<div class="row gtr-uniform">
-										<div class="col-4 col-12-xsmall">
+										<div class="col-4 col-12-small">
 											<a class="button small fit" onclick="exportSVG()">Export SVG</a>
 										</div>
-										<div class="col-4 col-12-xsmall">
-											<a class="button small fit" id="btn-export-typst" onclick="exportTypst()">Export Typst</a>
-										</div>
-										<div class="col-4 col-12-xsmall">
+										<div class="col-4 col-12-small">
 											<a class="button small fit" id="btn-export-code" onclick="exportLaTeX()">Export LaTeX</a>
 										</div>
+										<div class="col-4 col-12-small">
+											<input type="checkbox" id="prop-explicit-waves">
+											<label for="prop-explicit-waves" checked>Always use explicit waves (see below).</label>
+										</div>
 									</div>
-								</div>
-
-								<div class="fit" style="margin-top: 0.5rem;">
-									<input type="checkbox" id="prop-explicit-waves">
-									<label for="prop-explicit-waves">Always use explicit waves (see below).</label>
 								</div>
 
 								<div id="save-load-tools" style="margin-top: 0.5rem;">
@@ -240,34 +236,38 @@
 							</section>
 
 							<section class="main">
-								<h2>Export Information</h2>
-								<h3>On Typst and LaTeX exportation</h3>
-								<p>
-									LaTeX (TikZ) and Typst (CeTZ) natively support wavy and spring-like paths for photons and gluons.
-									However, when drawing highly curved or high-multiplicity propagators, native decorations can produce
-									graphical artifacts due to phase shifts between the inner and outer strokes.
-								</p>
-								<p>
-									To prevent this, FeynDrawGram automatically falls back to an explicit, point-by-point path generation
-									for the entire diagram when such complex lines are detected. While this ensures perfect pixel-to-pixel
-									consistency with the web preview, it produces larger code that takes longer to compile and is harder to edit manually. 
-									If you prefer, you can force this high-fidelity export for all diagrams by checking the
-									<strong>"Always use explicit waves"</strong> option above.
-								</p>
-								<h3>Typst dependencies</h3>
-								Work in progress...	
-								<h3>LaTeX dependencies</h3>
-								<div id="latex-deps-notice" style="margin-top: 1rem; padding: 1rem; background-color: #fff8e1; border: 1px solid #ffe082; border-radius: 0.5rem; font-size: 0.85rem;">
-										<strong>To compile the exported <code>.tex</code> file</strong>, you must include into the preable:
-										<pre style="margin: 0.5rem 0; background: #fff; padding: 0.6rem; border-radius: 0.3rem; overflow-x: auto;">\usepackage{tikz}
+									<h2>Integration & Export</h2>
+									
+									<h3>Typst Integration</h3>
+									<p>
+											There is no need to export any specific code for Typst! Simply <strong>save your diagram as a JSON file</strong> using the "Save" button above. 
+											Then, use the official <strong><code>feyndrawgram</code> package on Typst Universe</strong> to render it directly in your document.
+									</p>
+
+									<hr>
+
+									<h3>LaTeX (TikZ) Export</h3>
+									<p>
+											LaTeX (TikZ) natively supports wavy and spring-like paths for photons and gluons.
+											However, when drawing highly curved or high-multiplicity propagators, native decorations can produce
+											graphical artifacts due to phase shifts between the inner and outer strokes.
+									</p>
+									<p>
+											To prevent this, FeynDrawGram <strong>defaults to an explicit, point-by-point path generation</strong> for these lines (toggleable via the checkbox above). While this ensures perfect pixel-to-pixel
+											consistency with the web preview, it produces slightly larger code. 
+									</p>
+									
+									<div id="latex-deps-notice" style="margin-top: 1rem; padding: 1rem; background-color: #fff8e1; border: 1px solid #ffe082; border-radius: 0.5rem; font-size: 0.85rem;">
+											<strong>To compile the exported <code>.tex</code> file</strong>, you must include the following in your preamble:
+											<pre style="margin: 0.5rem 0; background: #fff; padding: 0.6rem; border-radius: 0.3rem; overflow-x: auto;">\usepackage{tikz}
 \usepackage{xcolor}
 \usetikzlibrary{decorations.pathmorphing}
 \usetikzlibrary{decorations.markings}
 \usetikzlibrary{patterns}
 \usetikzlibrary{patterns.meta}
 \usetikzlibrary{arrows.meta}</pre>
-										After that, you can import your Feynman diagram with <code>\input{feynman_diagram.tex}</code>.
-								</div>
+											After that, you can insert your Feynman diagram with <code>\input{feynman_diagram.tex}</code>.
+									</div>
 							</section>
 					</div>
 
