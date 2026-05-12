@@ -2414,7 +2414,6 @@ function loadDiagram() {
         }
 
         if (fileVersion === 0.0) {
-          console.log("Rilevata versione 0.0: applico rescaling 25/40...");
           const f = 25 / 40;
 
           // Rescaling nodes
